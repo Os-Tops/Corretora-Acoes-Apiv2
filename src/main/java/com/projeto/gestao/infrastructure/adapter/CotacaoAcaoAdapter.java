@@ -1,0 +1,71 @@
+package com.projeto.gestao.infrastructure.adapter;
+
+import com.projeto.gestao.domain.port.CotacaoAcaoPort;
+import com.projeto.gestao.infrastructure.client.AlphaVantageClient;
+import com.projeto.gestao.infrastructure.client.BrapiClient;
+import com.projeto.gestao.infrastructure.client.dto.AlphaVantageResponseDto;
+import com.projeto.gestao.infrastructure.client.dto.BrapiResponseDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CotacaoAcaoAdapter implements CotacaoAcaoPort {
+
+    private static final Logger log = LoggerFactory.getLogger(CotacaoAcaoAdapter.class);
+
+    private final BrapiClient brapiClient;
+    private final AlphaVantageClient alphaVantageClient;
+
+    @Value("${api.brapi.token}")
+    private String brapiToken;
+
+    @Value("${api.alphavantage.key}")
+    private String alphaVantageKey;
+
+    public CotacaoAcaoAdapter(BrapiClient brapiClient, AlphaVantageClient alphaVantageClient) {
+        this.brapiClient = brapiClient;
+        this.alphaVantageClient = alphaVantageClient;
+    }
+
+    @Override
+    public CotacaoInfo getCotacao(String ticker, String mercado) {
+        if ("BR".equalsIgnoreCase(mercado)) {
+            try {
+                log.info("Consultando cotacao BR para ticker={} via Brapi", ticker);
+                BrapiResponseDto dto = brapiClient.consultarCotacao(ticker, brapiToken);
+                if (dto != null && dto.getResults() != null && !dto.getResults().isEmpty()) {
+                    var result = dto.getResults().get(0);
+                    log.info("Cotacao obtida: {} = {}", result.getSymbol(), result.getRegularMarketPrice());
+                    return new CotacaoInfo(result.getSymbol(), result.getShortName(), result.getCurrency(), result.getRegularMarketPrice());
+                }
+                log.warn("Brapi retornou resposta vazia para ticker={}", ticker);
+                throw new IllegalArgumentException("Ticker '" + ticker + "' nao encontrado no mercado BR (Brapi).");
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception e) {
+                log.error("Erro ao consultar Brapi para ticker={}: {} - {}", ticker, e.getClass().getSimpleName(), e.getMessage());
+                throw new IllegalArgumentException("Erro ao consultar cotacao BR para '" + ticker + "': " + e.getMessage());
+            }
+        } else if ("US".equalsIgnoreCase(mercado)) {
+            try {
+                log.info("Consultando cotacao US para ticker={} via Alpha Vantage", ticker);
+                AlphaVantageResponseDto dto = alphaVantageClient.consultarCotacao(ticker, alphaVantageKey);
+                if (dto != null && dto.getGlobalQuote() != null && dto.getGlobalQuote().getPrice() != null) {
+                    var quote = dto.getGlobalQuote();
+                    log.info("Cotacao obtida: {} = {}", quote.getSymbol(), quote.getPrice());
+                    return new CotacaoInfo(quote.getSymbol(), ticker, "USD", quote.getPrice());
+                }
+                log.warn("Alpha Vantage retornou resposta vazia para ticker={}. Verifique se a API key e valida.", ticker);
+                throw new IllegalArgumentException("Ticker '" + ticker + "' nao encontrado no mercado US. Verifique se o ticker e valido e se a API key do Alpha Vantage esta configurada.");
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception e) {
+                log.error("Erro ao consultar Alpha Vantage para ticker={}: {} - {}", ticker, e.getClass().getSimpleName(), e.getMessage());
+                throw new IllegalArgumentException("Erro ao consultar cotacao US para '" + ticker + "': " + e.getMessage());
+            }
+        }
+        throw new IllegalArgumentException("Mercado invalido: '" + mercado + "'. Valores aceitos: BR, US.");
+    }
+}
