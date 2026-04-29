@@ -1,0 +1,218 @@
+{
+  "info": {
+    "_postman_id": "900a2f5c-cfe1-4a47-aca0-4a11e70becf6",
+    "name": "ApiGestaoAcoesCorretoras",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53946683",
+    "_collection_link": "https://go.postman.co/collection/53946683-900a2f5c-cfe1-4a47-aca0-4a11e70becf6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Acao",
+      "item": [
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ticker\": \"PETR4\",\r\n    \"mercado\": \"BR\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/acoes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "acoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/acoes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "acoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/acoes/55c84456-28f1-48c8-a059-6a02dcf0af3c",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "acoes",
+                "55c84456-28f1-48c8-a059-6a02dcf0af3c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Ticker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/acoes/ticker/PETR4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "acoes",
+                "ticker",
+                "PETR4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/acoes/55c84456-28f1-48c8-a059-6a02dcf0af3c/atualizar-cotacao",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "acoes",
+                "55c84456-28f1-48c8-a059-6a02dcf0af3c",
+                "atualizar-cotacao"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Corretora",
+      "item": [
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"cnpj\": \"53931905000141\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/corretoras",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "corretoras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/corretoras",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "corretoras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/corretoras/90a89cb5-f45d-40ca-85c2-f609e6b7b6db",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "corretoras",
+                "90a89cb5-f45d-40ca-85c2-f609e6b7b6db"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar CNPJ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/corretoras/cnpj/53931905000141",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "corretoras",
+                "cnpj",
+                "53931905000141"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
