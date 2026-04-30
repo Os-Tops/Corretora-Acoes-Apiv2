@@ -1,4 +1,4 @@
-package com.projeto.gestao.infrastructure.client.dto;
+package com.projeto.gestao.infra.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;

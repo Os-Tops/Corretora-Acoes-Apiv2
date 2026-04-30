@@ -1,8 +1,8 @@
-package com.projeto.gestao.infrastructure.adapter;
+package com.projeto.gestao.infra.adapter;
 
 import com.projeto.gestao.domain.port.BuscaCepPort;
-import com.projeto.gestao.infrastructure.client.ViaCepClient;
-import com.projeto.gestao.infrastructure.client.dto.ViaCepDto;
+import com.projeto.gestao.infra.client.ViaCepClient;
+import com.projeto.gestao.infra.client.dto.ViaCepDto;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 

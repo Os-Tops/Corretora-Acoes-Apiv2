@@ -3,7 +3,7 @@ package com.projeto.gestao.service;
 import com.projeto.gestao.domain.model.Corretora;
 import com.projeto.gestao.domain.port.BuscaCepPort;
 import com.projeto.gestao.domain.port.ValidacaoCnpjPort;
-import com.projeto.gestao.domain.repository.CorretoraRepository;
+import com.projeto.gestao.repository.CorretoraRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

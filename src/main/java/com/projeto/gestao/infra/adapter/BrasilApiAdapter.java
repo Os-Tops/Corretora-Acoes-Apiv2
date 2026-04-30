@@ -1,8 +1,8 @@
-package com.projeto.gestao.infrastructure.adapter;
+package com.projeto.gestao.infra.adapter;
 
 import com.projeto.gestao.domain.port.ValidacaoCnpjPort;
-import com.projeto.gestao.infrastructure.client.BrasilApiClient;
-import com.projeto.gestao.infrastructure.client.dto.BrasilApiCnpjDto;
+import com.projeto.gestao.infra.client.BrasilApiClient;
+import com.projeto.gestao.infra.client.dto.BrasilApiCnpjDto;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 

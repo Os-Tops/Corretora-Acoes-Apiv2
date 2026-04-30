@@ -1,4 +1,4 @@
-package com.projeto.gestao.infrastructure.client.dto;
+package com.projeto.gestao.infra.client.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

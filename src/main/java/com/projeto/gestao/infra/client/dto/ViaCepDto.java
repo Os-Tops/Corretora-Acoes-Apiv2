@@ -1,4 +1,4 @@
-package com.projeto.gestao.infrastructure.client.dto;
+package com.projeto.gestao.infra.client.dto;
 
 public class ViaCepDto {
     private String cep;

@@ -1,4 +1,4 @@
-package com.projeto.gestao.domain.repository;
+package com.projeto.gestao.repository;
 
 import com.projeto.gestao.domain.model.Corretora;
 import org.springframework.data.jpa.repository.JpaRepository;

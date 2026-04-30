@@ -1,6 +1,6 @@
-package com.projeto.gestao.infrastructure.client;
+package com.projeto.gestao.infra.client;
 
-import com.projeto.gestao.infrastructure.client.dto.ViaCepDto;
+import com.projeto.gestao.infra.client.dto.ViaCepDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

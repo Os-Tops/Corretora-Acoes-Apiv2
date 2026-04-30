@@ -2,7 +2,7 @@ package com.projeto.gestao.service;
 
 import com.projeto.gestao.domain.model.Acao;
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
-import com.projeto.gestao.domain.repository.AcaoRepository;
+import com.projeto.gestao.repository.AcaoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -2,7 +2,7 @@ package com.projeto.gestao.service;
 
 import com.projeto.gestao.domain.model.Acao;
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
-import com.projeto.gestao.domain.repository.AcaoRepository;
+import com.projeto.gestao.repository.AcaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

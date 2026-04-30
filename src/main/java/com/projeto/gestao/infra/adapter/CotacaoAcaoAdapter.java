@@ -1,10 +1,10 @@
-package com.projeto.gestao.infrastructure.adapter;
+package com.projeto.gestao.infra.adapter;
 
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
-import com.projeto.gestao.infrastructure.client.AlphaVantageClient;
-import com.projeto.gestao.infrastructure.client.BrapiClient;
-import com.projeto.gestao.infrastructure.client.dto.AlphaVantageResponseDto;
-import com.projeto.gestao.infrastructure.client.dto.BrapiResponseDto;
+import com.projeto.gestao.infra.client.AlphaVantageClient;
+import com.projeto.gestao.infra.client.BrapiClient;
+import com.projeto.gestao.infra.client.dto.AlphaVantageResponseDto;
+import com.projeto.gestao.infra.client.dto.BrapiResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
