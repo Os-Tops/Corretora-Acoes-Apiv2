@@ -36,6 +36,7 @@ class AcaoServiceTest {
     void deveCadastrarAcaoBrComSucesso() {
         String ticker = "PETR4";
         String mercado = "BR";
+        Double quantidadeCompra = 1.00;
         CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
             "PETR4", "Petrobras PN", "BRL", new BigDecimal("38.50")
         );
@@ -48,7 +49,7 @@ class AcaoServiceTest {
             return a;
         });
 
-        Acao result = acaoService.cadastrarAcao(ticker, mercado);
+        Acao result = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
 
         assertNotNull(result);
         assertEquals("PETR4", result.getTicker());
@@ -63,6 +64,7 @@ class AcaoServiceTest {
     void deveCadastrarAcaoUsComSucesso() {
         String ticker = "AAPL";
         String mercado = "US";
+        Double quantidadeCompra = 1.00;
         CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
             "AAPL", "Apple Inc.", "USD", new BigDecimal("213.70")
         );
@@ -71,7 +73,7 @@ class AcaoServiceTest {
         when(cotacaoAcaoPort.getCotacao(ticker, mercado)).thenReturn(cotacaoMock);
         when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Acao result = acaoService.cadastrarAcao(ticker, mercado);
+        Acao result = acaoService.cadastrarAcao(ticker, mercado,  quantidadeCompra);
 
         assertEquals("USD", result.getMoeda());
         assertEquals("US", result.getMercado());
@@ -86,7 +88,7 @@ class AcaoServiceTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> acaoService.cadastrarAcao(ticker, "BR")
+            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0)
         );
 
         assertTrue(ex.getMessage().contains("já existe"));
@@ -103,7 +105,7 @@ class AcaoServiceTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> acaoService.cadastrarAcao(ticker, "BR")
+            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0)
         );
 
         assertTrue(ex.getMessage().contains("XPTO99"));
@@ -160,7 +162,7 @@ class AcaoServiceTest {
         when(cotacaoAcaoPort.getCotacao(ticker, "BR")).thenReturn(cotacaoMock);
         when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Acao result = acaoService.cadastrarAcao(ticker, "BR");
+        Acao result = acaoService.cadastrarAcao(ticker, "BR", 1.0);
 
         assertEquals("PETR4", result.getTicker());
     }

@@ -1,5 +1,6 @@
 package com.projeto.gestao.service;
 
+import com.projeto.gestao.service.AcaoService;
 import com.projeto.gestao.domain.model.*;
 import com.projeto.gestao.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,21 @@ public class DBService {
     @Autowired
     private AcaoRepository acaoRepo;
 
+    private final AcaoService acaoService;
+
     @Autowired
     private CorretoraRepository corretoraRepo;
+
+    public DBService(AcaoService acaoService) {
+        this.acaoService = acaoService;
+    }
 
 
     public void initDB() {
 
         try {
 
+            acaoService.cadastrarAcao("PETR4", "BR", 2.0);
 
         } catch (Exception e) {
             // Logar o erro ou lançar uma exceção customizada

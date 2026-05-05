@@ -140,18 +140,24 @@
                 <thead>
                     <tr>
                         <th>Ticker</th>
+                        <th>Posição</th>
                         <th>Empresa</th>
                         <th>Mercado</th>
+                        <th>Quantidade</th>
                         <th>Cotação</th>
+                        <th>Preço Médio</th>
                         <th>Data Atualização</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="acao : ${acoes}">
                         <td><span class="ticker-badge" th:text="${acao.ticker}">TICKER</span></td>
+                        <td class="price" th:text="${acao.moeda + ' ' + acao.posicao}">BRL 0.00</td>
                         <td th:text="${acao.nomeEmpresa}">Nome Empresa</td>
                         <td th:text="${acao.mercado}">BR</td>
+                        <td th:text="${acao.quantidadeTotal}"> Quantidade </td>
                         <td class="price" th:text="${acao.moeda + ' ' + acao.cotacaoAtual}">BRL 0.00</td>
+                        <td class="price" th:text="${acao.moeda + ' ' + acao.precoMedio}">BRL 0.00</td>
                         <td th:text="${#temporals.format(acao.dataHoraCotacao, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</td>
                     </tr>
                 </tbody>

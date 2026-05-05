@@ -6,6 +6,8 @@ import com.projeto.gestao.repository.AcaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,7 @@ public class AcaoService {
     }
 
     @Transactional
-    public Acao cadastrarAcao(String ticker, String mercado) {
+    public Acao cadastrarAcao(String ticker, String mercado, Double quantidadeCompra) {
         if (acaoRepository.existsByTicker(ticker)) {
             throw new IllegalArgumentException("Ação com este Ticker já existe.");
         }
@@ -38,7 +40,14 @@ public class AcaoService {
         acao.setNomeEmpresa(cotacaoInfo.nomeEmpresa() != null ? cotacaoInfo.nomeEmpresa() : ticker);
         acao.setMercado(mercado.toUpperCase());
         acao.setMoeda(cotacaoInfo.moeda());
+        acao.setQuantidadeCompra(BigDecimal.valueOf(quantidadeCompra));
+        acao.setQuantidadeTotal(acao.getQuantidadeTotal().add(BigDecimal.valueOf(quantidadeCompra)));
         acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
+        acao.calcularPosicaoAtualizada();
+        acao.setPrecoMedio(acao.getPrecoMedio().
+                add(cotacaoInfo.cotacaoAtual().
+                        multiply(BigDecimal.valueOf(quantidadeCompra))).
+                divide(acao.getQuantidadeTotal(), 2, RoundingMode.HALF_UP));
         acao.setDataHoraCotacao(LocalDateTime.now());
 
         return acaoRepository.save(acao);

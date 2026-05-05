@@ -24,10 +24,11 @@ public class AcaoController {
     public ResponseEntity<Acao> cadastrarAcao(@RequestBody Map<String, String> payload) {
         String ticker = payload.get("ticker");
         String mercado = payload.get("mercado");
-        if (ticker == null || mercado == null) {
-            throw new IllegalArgumentException("Ticker e Mercado são obrigatórios");
+        Double quantidadeCompra = Double.parseDouble(payload.get("quantidadeCompra"));
+        if (ticker == null || mercado == null || quantidadeCompra == null) {
+            throw new IllegalArgumentException("Ticker, Mercado e Quantidade são obrigatórios");
         }
-        Acao acao = acaoService.cadastrarAcao(ticker, mercado);
+        Acao acao = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
         return ResponseEntity.status(HttpStatus.CREATED).body(acao);
     }
 
