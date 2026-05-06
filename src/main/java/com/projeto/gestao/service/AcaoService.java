@@ -27,7 +27,10 @@ public class AcaoService {
     @Transactional
     public Acao cadastrarAcao(String ticker, String mercado, Double quantidadeCompra) {
         if (acaoRepository.existsByTicker(ticker)) {
-            throw new IllegalArgumentException("Ação com este Ticker já existe.");
+            UUID id = buscarPorTicker(ticker)
+                    .map(Acao::getId)
+                    .orElse(null);
+            return adicionarAcao(id, quantidadeCompra);
         }
 
         CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(ticker, mercado);
@@ -51,6 +54,31 @@ public class AcaoService {
         acao.setDataHoraCotacao(LocalDateTime.now());
 
         return acaoRepository.save(acao);
+    }
+
+    //Adicionar mais da mesma ação
+    @Transactional
+    public Acao adicionarAcao(UUID id, Double quantidadeCompra) {
+
+        Acao acao = acaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
+
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
+        if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
+            acao.setQuantidadeCompra(BigDecimal.valueOf(quantidadeCompra));
+            acao.setQuantidadeTotal(acao.getQuantidadeTotal().add(BigDecimal.valueOf(quantidadeCompra)));
+            acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
+            acao.calcularPosicaoAtualizada();
+            acao.setPrecoMedio(acao.getPrecoMedio().
+                    multiply(acao.getQuantidadeTotal().
+                            subtract(BigDecimal.valueOf(quantidadeCompra))).
+                    add(cotacaoInfo.cotacaoAtual().
+                            multiply(BigDecimal.valueOf(quantidadeCompra))).
+                    divide(acao.getQuantidadeTotal(), 2, RoundingMode.HALF_UP));
+            acao.setDataHoraCotacao(LocalDateTime.now());
+            return acaoRepository.save(acao);
+        }
+        throw new IllegalArgumentException("Não foi possível atualizar a cotação no momento.");
     }
 
     @Transactional

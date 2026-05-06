@@ -122,6 +122,10 @@
             text-align: center;
             color: var(--text-secondary);
         }
+
+        .topCollumn:hover {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -136,17 +140,17 @@
         </header>
 
         <div class="table-container">
-            <table th:if="${not #lists.isEmpty(acoes)}">
+            <table id="minhaTabela" th:if="${not #lists.isEmpty(acoes)}">
                 <thead>
                     <tr>
-                        <th>Ticker</th>
-                        <th>Posição</th>
-                        <th>Empresa</th>
-                        <th>Mercado</th>
-                        <th>Quantidade</th>
-                        <th>Cotação</th>
-                        <th>Preço Médio</th>
-                        <th>Data Atualização</th>
+                        <th onclick="ordenarTabela(0)" class="topCollumn">Ticker</th>
+                        <th onclick="ordenarTabela(1)" class="topCollumn">Posição</th>
+                        <th onclick="ordenarTabela(2)" class="topCollumn">Empresa</th>
+                        <th onclick="ordenarTabela(3)" class="topCollumn">Mercado</th>
+                        <th onclick="ordenarTabela(4)" class="topCollumn">Quantidade</th>
+                        <th onclick="ordenarTabela(5)" class="topCollumn">Cotação</th>
+                        <th onclick="ordenarTabela(6)" class="topCollumn">Preço Médio</th>
+                        <th onclick="ordenarTabela(7)" class="topCollumn">Data Atualização</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -170,3 +174,56 @@
     </div>
 </body>
 </html>
+<script>
+    function ordenarTabela(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("minhaTabela");
+        switching = true;
+
+        // Define a direção inicial da ordenação como crescente (asc):
+        dir = "asc";
+
+        // O loop continua até que nenhuma troca precise ser feita:
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            // Percorre todas as linhas da tabela (começando do índice 1 para pular o cabeçalho):
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+
+                // Pega o elemento atual e o próximo da coluna que foi clicada (n):
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                // Verifica se as linhas devem trocar de lugar, baseado na direção (asc ou desc):
+                if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (shouldSwitch) {
+                // Se uma troca deve ser feita, move a linha atual para baixo da próxima:
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++; // Aumenta a contagem de trocas
+            } else {
+                // Se o loop terminou sem NENHUMA troca e a direção era "asc",
+                // significa que a coluna já estava em ordem crescente.
+                // Então, mudamos para "desc" e rodamos o loop novamente para inverter.
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+</script>

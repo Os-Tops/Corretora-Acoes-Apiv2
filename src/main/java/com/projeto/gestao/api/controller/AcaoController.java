@@ -56,4 +56,10 @@ public class AcaoController {
         Acao acao = acaoService.atualizarCotacao(id);
         return ResponseEntity.ok(acao);
     }
+
+    @PutMapping
+    public ResponseEntity<Acao> adicionarAcao(@PathVariable UUID id, Double quantidadeCompra) {
+        Acao acao = acaoService.adicionarAcao(id, quantidadeCompra);
+        return ResponseEntity.ok(acao);
+    }
 }
