@@ -32,6 +32,13 @@ public class AcaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(acao);
     }
 
+    @PostMapping("/{ticker}")
+    public ResponseEntity<Acao> venderAcao(@PathVariable String ticker, @RequestBody Map<String, String> payload) {
+        Double quantidadeVenda = Double.parseDouble(payload.get("quantidadeVenda"));
+        Acao acao = acaoService.venderAcao(ticker, quantidadeVenda);
+        return ResponseEntity.status(HttpStatus.CREATED).body(acao);
+    }
+
     @GetMapping
     public ResponseEntity<List<Acao>> listarAcoes() {
         return ResponseEntity.ok(acaoService.listarTodas());

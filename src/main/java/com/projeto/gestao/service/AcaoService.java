@@ -82,6 +82,27 @@ public class AcaoService {
     }
 
     @Transactional
+    public Acao venderAcao(String ticker, Double quantidadeVenda) {
+
+        UUID id = buscarPorTicker(ticker)
+                .map(Acao::getId)
+                .orElse(null);
+
+        Acao acao = acaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
+
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
+        if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
+            acao.setQuantidadeTotal(acao.getQuantidadeTotal().subtract(BigDecimal.valueOf(quantidadeVenda)));
+            acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
+            acao.calcularPosicaoAtualizada();
+            acao.setDataHoraCotacao(LocalDateTime.now());
+            return acaoRepository.save(acao);
+        }
+        throw new IllegalArgumentException("Não foi possível atualizar a cotação no momento.");
+    }
+
+    @Transactional
     public Acao atualizarCotacao(UUID id) {
         Acao acao = acaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
