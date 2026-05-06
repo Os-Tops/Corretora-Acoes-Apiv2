@@ -165,6 +165,14 @@
                         <td th:text="${#temporals.format(acao.dataHoraCotacao, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</td>
                     </tr>
                 </tbody>
+                <tfoot th:if="${not #lists.isEmpty(carteiras)}">
+                <tr th:each="carteira : ${carteiras}">
+                    <td colspan="7" style="text-align: right; font-weight: 600; color: var(--text-primary);">
+                        Saldo Total da Carteira:
+                    </td>
+                    <td class="price" style="font-weight: 1000" th:text="${'R$ ' + carteira.saldoAcao}">R$ 0.00</td>
+                </tr>
+                </tfoot>
             </table>
             <div th:if="${#lists.isEmpty(acoes)}" class="empty-state">
                 <p>Nenhuma ação monitorada no momento.</p>
