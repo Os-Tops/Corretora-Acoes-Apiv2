@@ -15,6 +15,11 @@ import java.time.LocalDate;
 public class DBService {
 
     @Autowired
+    private CarteiraRepository carteiraRepository;
+
+    public final CarteiraService carteiraService;
+
+    @Autowired
     private AcaoRepository acaoRepo;
 
     private final AcaoService acaoService;
@@ -22,7 +27,8 @@ public class DBService {
     @Autowired
     private CorretoraRepository corretoraRepo;
 
-    public DBService(AcaoService acaoService) {
+    public DBService(CarteiraService carteiraService, AcaoService acaoService) {
+        this.carteiraService = carteiraService;
         this.acaoService = acaoService;
     }
 
@@ -32,6 +38,10 @@ public class DBService {
         try {
 
             acaoService.cadastrarAcao("PETR4", "BR", 2.0);
+
+            Carteira carteira = new Carteira();
+            carteira = carteiraRepository.save(carteira);
+            carteiraService.calcularSaldoAcao();
 
         } catch (Exception e) {
             // Logar o erro ou lançar uma exceção customizada

@@ -1,8 +1,10 @@
 package com.projeto.gestao.service;
 
 import com.projeto.gestao.domain.model.Acao;
+import com.projeto.gestao.domain.model.Carteira;
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
 import com.projeto.gestao.repository.AcaoRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +20,12 @@ public class AcaoService {
 
     private final AcaoRepository acaoRepository;
     private final CotacaoAcaoPort cotacaoAcaoPort;
+    private final CarteiraService carteiraService;
 
-    public AcaoService(AcaoRepository acaoRepository, CotacaoAcaoPort cotacaoAcaoPort) {
+    public AcaoService(AcaoRepository acaoRepository, CotacaoAcaoPort cotacaoAcaoPort, @Lazy CarteiraService carteiraService) {
         this.acaoRepository = acaoRepository;
         this.cotacaoAcaoPort = cotacaoAcaoPort;
+        this.carteiraService = carteiraService;
     }
 
     @Transactional
@@ -52,6 +56,9 @@ public class AcaoService {
                         multiply(BigDecimal.valueOf(quantidadeCompra))).
                 divide(acao.getQuantidadeTotal(), 2, RoundingMode.HALF_UP));
         acao.setDataHoraCotacao(LocalDateTime.now());
+        acaoRepository.save(acao);
+
+        carteiraService.calcularSaldoAcao();
 
         return acaoRepository.save(acao);
     }
@@ -76,6 +83,10 @@ public class AcaoService {
                             multiply(BigDecimal.valueOf(quantidadeCompra))).
                     divide(acao.getQuantidadeTotal(), 2, RoundingMode.HALF_UP));
             acao.setDataHoraCotacao(LocalDateTime.now());
+            acaoRepository.save(acao);
+
+            carteiraService.calcularSaldoAcao();
+
             return acaoRepository.save(acao);
         }
         throw new IllegalArgumentException("Não foi possível atualizar a cotação no momento.");
@@ -97,6 +108,10 @@ public class AcaoService {
             acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
             acao.calcularPosicaoAtualizada();
             acao.setDataHoraCotacao(LocalDateTime.now());
+            acaoRepository.save(acao);
+
+            carteiraService.calcularSaldoAcao();
+
             return acaoRepository.save(acao);
         }
         throw new IllegalArgumentException("Não foi possível atualizar a cotação no momento.");
