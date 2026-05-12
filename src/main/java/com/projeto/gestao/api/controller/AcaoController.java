@@ -24,10 +24,18 @@ public class AcaoController {
     public ResponseEntity<Acao> cadastrarAcao(@RequestBody Map<String, String> payload) {
         String ticker = payload.get("ticker");
         String mercado = payload.get("mercado");
-        if (ticker == null || mercado == null) {
-            throw new IllegalArgumentException("Ticker e Mercado são obrigatórios");
+        Double quantidadeCompra = Double.parseDouble(payload.get("quantidadeCompra"));
+        if (ticker == null || mercado == null || quantidadeCompra == null) {
+            throw new IllegalArgumentException("Ticker, Mercado e Quantidade são obrigatórios");
         }
-        Acao acao = acaoService.cadastrarAcao(ticker, mercado);
+        Acao acao = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
+        return ResponseEntity.status(HttpStatus.CREATED).body(acao);
+    }
+
+    @PostMapping("/{ticker}")
+    public ResponseEntity<Acao> venderAcao(@PathVariable String ticker, @RequestBody Map<String, String> payload) {
+        Double quantidadeVenda = Double.parseDouble(payload.get("quantidadeVenda"));
+        Acao acao = acaoService.venderAcao(ticker, quantidadeVenda);
         return ResponseEntity.status(HttpStatus.CREATED).body(acao);
     }
 
@@ -53,6 +61,12 @@ public class AcaoController {
     @PutMapping("/{id}/atualizar-cotacao")
     public ResponseEntity<Acao> atualizarCotacao(@PathVariable UUID id) {
         Acao acao = acaoService.atualizarCotacao(id);
+        return ResponseEntity.ok(acao);
+    }
+
+    @PutMapping
+    public ResponseEntity<Acao> adicionarAcao(@PathVariable UUID id, Double quantidadeCompra) {
+        Acao acao = acaoService.adicionarAcao(id, quantidadeCompra);
         return ResponseEntity.ok(acao);
     }
 }
