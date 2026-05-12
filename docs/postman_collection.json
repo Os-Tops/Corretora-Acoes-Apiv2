@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "900a2f5c-cfe1-4a47-aca0-4a11e70becf6",
+    "_postman_id": "510b8a48-6529-4707-b80f-dccd3d46d579",
     "name": "ApiGestaoAcoesCorretoras",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "53946683",
-    "_collection_link": "https://go.postman.co/collection/53946683-900a2f5c-cfe1-4a47-aca0-4a11e70becf6?source=collection_link"
+    "_exporter_id": "48996390",
+    "_collection_link": "https://go.postman.co/collection/48996390-510b8a48-6529-4707-b80f-dccd3d46d579?source=collection_link"
   },
   "item": [
     {
@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"ticker\": \"PETR4\",\r\n    \"mercado\": \"BR\"\r\n}",
+              "raw": "{\r\n    \"ticker\": \"VALE3\",\r\n    \"mercado\": \"BR\",\r\n    \"quantidadeCompra\" : 2.0\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

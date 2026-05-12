@@ -1,6 +1,7 @@
 package com.projeto.gestao.controller;
 
 import com.projeto.gestao.service.AcaoService;
+import com.projeto.gestao.service.CarteiraService;
 import com.projeto.gestao.service.CorretoraService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,10 +14,12 @@ public class DashboardController {
 
     private final CorretoraService corretoraService;
     private final AcaoService acaoService;
+    private final CarteiraService carteiraService;
 
-    public DashboardController(CorretoraService corretoraService, AcaoService acaoService) {
+    public DashboardController(CorretoraService corretoraService, AcaoService acaoService, CarteiraService carteiraService) {
         this.corretoraService = corretoraService;
         this.acaoService = acaoService;
+        this.carteiraService = carteiraService;
     }
 
     @GetMapping
@@ -35,6 +38,13 @@ public class DashboardController {
     @GetMapping("/acoes")
     public String acoes(Model model) {
         model.addAttribute("acoes", acaoService.listarTodas());
+        model.addAttribute("carteiras", carteiraService.listarTodas());
         return "acoes";
+    }
+
+    @GetMapping("/carteiras")
+    public String carteiras(Model model) {
+        model.addAttribute("carteiras", carteiraService.listarTodas());
+        return "carteiras";
     }
 }

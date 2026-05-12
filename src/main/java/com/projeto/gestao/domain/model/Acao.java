@@ -20,10 +20,18 @@ public class Acao {
     private String nomeEmpresa;
     
     private String mercado; // BR, US
-    
+
     private String moeda; // BRL, USD
-    
+
+    private BigDecimal posicao = BigDecimal.ZERO;
+
+    private BigDecimal quantidadeCompra = BigDecimal.ZERO;
+
+    private BigDecimal quantidadeTotal = BigDecimal.ZERO;
+
     private BigDecimal cotacaoAtual;
+
+    private BigDecimal precoMedio = BigDecimal.ZERO;
     
     private LocalDateTime dataHoraCotacao;
 
@@ -32,6 +40,14 @@ public class Acao {
     private Corretora corretoraRelacionada;
 
     public Acao() {
+    }
+
+    public Acao(BigDecimal quantidadeTotal) {
+        if (quantidadeTotal == null) {
+            this.quantidadeTotal = BigDecimal.ZERO;
+        } else {
+            this.quantidadeTotal = quantidadeTotal;
+        }
     }
 
     public UUID getId() { return id; }
@@ -49,14 +65,40 @@ public class Acao {
     public String getMoeda() { return moeda; }
     public void setMoeda(String moeda) { this.moeda = moeda; }
 
+    public BigDecimal getPosicao() { return posicao; }
+    public void setPosicao(BigDecimal posicao) { this.posicao = this.quantidadeTotal.multiply(this.cotacaoAtual);}
+
+    public BigDecimal getQuantidadeCompra() { return quantidadeCompra; }
+    public void setQuantidadeCompra(BigDecimal quantidadeCompra) { this.quantidadeCompra = quantidadeCompra; }
+
+    public BigDecimal getQuantidadeTotal() { return quantidadeTotal; }
+    public void setQuantidadeTotal(BigDecimal quantidadeTotal) {
+        if (quantidadeTotal == null) {
+            this.quantidadeTotal = BigDecimal.ZERO;
+        } else {
+            this.quantidadeTotal = quantidadeTotal;
+        }
+    }
+
     public BigDecimal getCotacaoAtual() { return cotacaoAtual; }
     public void setCotacaoAtual(BigDecimal cotacaoAtual) { this.cotacaoAtual = cotacaoAtual; }
+
+    public BigDecimal getPrecoMedio() { return precoMedio; }
+    public void setPrecoMedio(BigDecimal precoMedio) { this.precoMedio = precoMedio; }
 
     public LocalDateTime getDataHoraCotacao() { return dataHoraCotacao; }
     public void setDataHoraCotacao(LocalDateTime dataHoraCotacao) { this.dataHoraCotacao = dataHoraCotacao; }
 
     public Corretora getCorretoraRelacionada() { return corretoraRelacionada; }
     public void setCorretoraRelacionada(Corretora corretoraRelacionada) { this.corretoraRelacionada = corretoraRelacionada; }
+
+    public void calcularPosicaoAtualizada() {
+        if (this.quantidadeTotal != null && this.cotacaoAtual != null) {
+            this.posicao = this.quantidadeTotal.multiply(this.cotacaoAtual);
+        } else {
+            this.posicao = BigDecimal.ZERO;
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
