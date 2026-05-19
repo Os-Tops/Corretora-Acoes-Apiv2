@@ -1,5 +1,6 @@
 package com.projeto.gestao.service;
 
+import com.projeto.gestao.domain.enums.Mercado;
 import com.projeto.gestao.service.AcaoService;
 import com.projeto.gestao.domain.model.*;
 import com.projeto.gestao.repository.*;
@@ -26,6 +27,8 @@ public class DBService {
 
     @Autowired
     private CorretoraRepository corretoraRepo;
+    @Autowired
+    private CorretoraService corretoraService;
 
     public DBService(CarteiraService carteiraService, AcaoService acaoService) {
         this.carteiraService = carteiraService;
@@ -37,7 +40,11 @@ public class DBService {
 
         try {
 
-            acaoService.cadastrarAcao("PETR4", "BR", 2.0);
+            Corretora corretora1 = corretoraService.cadastrarCorretora("47847884000188");
+            corretoraRepo.save(corretora1);
+
+            Acao acao1 = acaoService.cadastrarAcao("PETR4", 0, 2.0, corretora1);
+            acaoRepo.save(acao1);
 
             Carteira carteira = new Carteira();
             carteira = carteiraRepository.save(carteira);

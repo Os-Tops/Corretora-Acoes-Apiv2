@@ -1,5 +1,7 @@
 package com.projeto.gestao.domain.model;
 
+import com.projeto.gestao.domain.enums.Mercado;
+import com.projeto.gestao.domain.enums.Moeda;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,9 +21,9 @@ public class Acao {
 
     private String nomeEmpresa;
     
-    private String mercado; // BR, US
+    private Mercado mercado; // BR, US
 
-    private String moeda; // BRL, USD
+    private Moeda moeda; // BRL, USD
 
     private BigDecimal posicao = BigDecimal.ZERO;
 
@@ -59,11 +61,11 @@ public class Acao {
     public String getNomeEmpresa() { return nomeEmpresa; }
     public void setNomeEmpresa(String nomeEmpresa) { this.nomeEmpresa = nomeEmpresa; }
 
-    public String getMercado() { return mercado; }
-    public void setMercado(String mercado) { this.mercado = mercado; }
+    public Mercado getMercado() { return mercado; }
+    public void setMercado(Mercado mercado) { this.mercado = mercado; }
 
-    public String getMoeda() { return moeda; }
-    public void setMoeda(String moeda) { this.moeda = moeda; }
+    public Moeda getMoeda() { return moeda; }
+    public void setMoeda(Moeda moeda) { this.moeda = moeda; }
 
     public BigDecimal getPosicao() { return posicao; }
     public void setPosicao(BigDecimal posicao) { this.posicao = this.quantidadeTotal.multiply(this.cotacaoAtual);}
@@ -89,8 +91,8 @@ public class Acao {
     public LocalDateTime getDataHoraCotacao() { return dataHoraCotacao; }
     public void setDataHoraCotacao(LocalDateTime dataHoraCotacao) { this.dataHoraCotacao = dataHoraCotacao; }
 
-    public Corretora getCorretoraRelacionada() { return corretoraRelacionada; }
-    public void setCorretoraRelacionada(Corretora corretoraRelacionada) { this.corretoraRelacionada = corretoraRelacionada; }
+    public Corretora getCorretora() { return corretoraRelacionada; }
+    public void setCorretora(Corretora corretoraRelacionada) { this.corretoraRelacionada = corretoraRelacionada; }
 
     public void calcularPosicaoAtualizada() {
         if (this.quantidadeTotal != null && this.cotacaoAtual != null) {

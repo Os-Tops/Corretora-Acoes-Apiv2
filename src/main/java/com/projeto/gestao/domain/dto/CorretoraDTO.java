@@ -3,7 +3,7 @@ package com.projeto.gestao.domain.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class CorretoraDto {
+public class CorretoraDTO {
 	private UUID id;
 	private String cnpj;
 	private String razaoSocial;
@@ -21,7 +21,7 @@ public class CorretoraDto {
 	private Boolean validadaNaCvm;
 	private LocalDateTime dataCadastro;
 
-	public CorretoraDto() {
+	public CorretoraDTO() {
 		// TODO Auto-generated constructor stub
 	}
 

@@ -1,11 +1,17 @@
 package com.projeto.gestao.api.controller;
 
+import com.projeto.gestao.domain.dto.AcaoDTO;
+import com.projeto.gestao.domain.enums.Mercado;
 import com.projeto.gestao.domain.model.Acao;
+import com.projeto.gestao.domain.model.Corretora;
 import com.projeto.gestao.service.AcaoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,15 +27,18 @@ public class AcaoController {
     }
 
     @PostMapping
-    public ResponseEntity<Acao> cadastrarAcao(@RequestBody Map<String, String> payload) {
-        String ticker = payload.get("ticker");
-        String mercado = payload.get("mercado");
-        Double quantidadeCompra = Double.parseDouble(payload.get("quantidadeCompra"));
-        if (ticker == null || mercado == null || quantidadeCompra == null) {
-            throw new IllegalArgumentException("Ticker, Mercado e Quantidade são obrigatórios");
-        }
-        Acao acao = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
-        return ResponseEntity.status(HttpStatus.CREATED).body(acao);
+    public ResponseEntity<AcaoDTO> cadastrarAcao(@RequestBody @Valid AcaoDTO acaoDTO) {
+
+        AcaoDTO created = acaoService.create(dto);
+
+        // 2. Monta a URI de retorno (Header Location) apontando para o recurso criado
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}") // Adiciona o caminho do ID na URL (ex: /acoes/123e4567...)
+                .buildAndExpand(created.getId())
+                .toUri();
+
+        // 3. Retorna o status 201 (Created) com a URI e o corpo da resposta
+        return ResponseEntity.created(location).body(created);
     }
 
     @PostMapping("/{ticker}")

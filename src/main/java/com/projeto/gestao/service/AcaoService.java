@@ -1,9 +1,13 @@
 package com.projeto.gestao.service;
 
+import com.projeto.gestao.domain.enums.Mercado;
+import com.projeto.gestao.domain.enums.Moeda;
 import com.projeto.gestao.domain.model.Acao;
 import com.projeto.gestao.domain.model.Carteira;
+import com.projeto.gestao.domain.model.Corretora;
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
 import com.projeto.gestao.repository.AcaoRepository;
+import com.projeto.gestao.repository.CorretoraRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,17 +23,19 @@ import java.util.UUID;
 public class AcaoService {
 
     private final AcaoRepository acaoRepository;
+    private final CorretoraRepository corretoraRepository;
     private final CotacaoAcaoPort cotacaoAcaoPort;
     private final CarteiraService carteiraService;
 
-    public AcaoService(AcaoRepository acaoRepository, CotacaoAcaoPort cotacaoAcaoPort, @Lazy CarteiraService carteiraService) {
+    public AcaoService(AcaoRepository acaoRepository, CorretoraRepository corretoraRepository, CotacaoAcaoPort cotacaoAcaoPort, @Lazy CarteiraService carteiraService) {
         this.acaoRepository = acaoRepository;
+        this.corretoraRepository = corretoraRepository;
         this.cotacaoAcaoPort = cotacaoAcaoPort;
         this.carteiraService = carteiraService;
     }
 
     @Transactional
-    public Acao cadastrarAcao(String ticker, String mercado, Double quantidadeCompra) {
+    public Acao cadastrarAcao(String ticker, Integer mercado, Double quantidadeCompra, Corretora corretora) {
         if (acaoRepository.existsByTicker(ticker)) {
             UUID id = buscarPorTicker(ticker)
                     .map(Acao::getId)
@@ -37,7 +43,11 @@ public class AcaoService {
             return adicionarAcao(id, quantidadeCompra);
         }
 
-        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(ticker, mercado);
+        Mercado mercadoEnum = Mercado.toEnum(mercado);
+
+        String mercadoString = mercadoEnum.name();
+
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(ticker, mercadoString);
         if (cotacaoInfo == null) {
             throw new IllegalArgumentException("Não foi possível obter dados para este Ticker.");
         }
@@ -45,8 +55,8 @@ public class AcaoService {
         Acao acao = new Acao();
         acao.setTicker(ticker.toUpperCase());
         acao.setNomeEmpresa(cotacaoInfo.nomeEmpresa() != null ? cotacaoInfo.nomeEmpresa() : ticker);
-        acao.setMercado(mercado.toUpperCase());
-        acao.setMoeda(cotacaoInfo.moeda());
+        acao.setMercado(mercadoEnum); // int -> enum
+        acao.setMoeda(Moeda.fromString(cotacaoInfo.moeda()));
         acao.setQuantidadeCompra(BigDecimal.valueOf(quantidadeCompra));
         acao.setQuantidadeTotal(acao.getQuantidadeTotal().add(BigDecimal.valueOf(quantidadeCompra)));
         acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
@@ -56,6 +66,7 @@ public class AcaoService {
                         multiply(BigDecimal.valueOf(quantidadeCompra))).
                 divide(acao.getQuantidadeTotal(), 2, RoundingMode.HALF_UP));
         acao.setDataHoraCotacao(LocalDateTime.now());
+        acao.setCorretora(corretora);
         acaoRepository.save(acao);
 
         carteiraService.calcularSaldoAcao();
@@ -70,7 +81,7 @@ public class AcaoService {
         Acao acao = acaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
 
-        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado().getDescricao());
         if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
             acao.setQuantidadeCompra(BigDecimal.valueOf(quantidadeCompra));
             acao.setQuantidadeTotal(acao.getQuantidadeTotal().add(BigDecimal.valueOf(quantidadeCompra)));
@@ -102,7 +113,7 @@ public class AcaoService {
         Acao acao = acaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
 
-        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado().getDescricao());
         if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
             acao.setQuantidadeTotal(acao.getQuantidadeTotal().subtract(BigDecimal.valueOf(quantidadeVenda)));
             acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
@@ -122,7 +133,7 @@ public class AcaoService {
         Acao acao = acaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
 
-        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
+        CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado().getDescricao());
         if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
             acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
             acao.setDataHoraCotacao(LocalDateTime.now());
