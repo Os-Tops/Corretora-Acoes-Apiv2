@@ -35,8 +35,8 @@ public class Acao {
     
     private LocalDateTime dataHoraCotacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "corretora_id")
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "corretora_id", nullable = false)
     private Corretora corretoraRelacionada;
 
     public Acao() {

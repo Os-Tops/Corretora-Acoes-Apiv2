@@ -21,20 +21,25 @@ public class AcaoController {
     }
 
     @PostMapping
-    public ResponseEntity<Acao> cadastrarAcao(@RequestBody Map<String, String> payload) {
-        String ticker = payload.get("ticker");
-        String mercado = payload.get("mercado");
-        Double quantidadeCompra = Double.parseDouble(payload.get("quantidadeCompra"));
-        if (ticker == null || mercado == null || quantidadeCompra == null) {
-            throw new IllegalArgumentException("Ticker, Mercado e Quantidade são obrigatórios");
+    public ResponseEntity<Acao> cadastrarAcao(@RequestBody Map<String, Object> payload) {
+        String ticker = getAsText(payload, "ticker");
+        String mercado = getAsText(payload, "mercado");
+        String quantidadeCompraText = getAsText(payload, "quantidadeCompra");
+        String corretoraIdText = getAsText(payload, "corretoraId");
+
+        if (isBlank(ticker) || isBlank(mercado) || isBlank(quantidadeCompraText) || isBlank(corretoraIdText)) {
+            throw new IllegalArgumentException("Ticker, Mercado, Quantidade e Corretora sao obrigatorios");
         }
-        Acao acao = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
+
+        Double quantidadeCompra = parseQuantidade(quantidadeCompraText);
+        UUID corretoraId = parseCorretoraId(corretoraIdText);
+        Acao acao = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra, corretoraId);
         return ResponseEntity.status(HttpStatus.CREATED).body(acao);
     }
 
     @PostMapping("/{ticker}")
-    public ResponseEntity<Acao> venderAcao(@PathVariable String ticker, @RequestBody Map<String, String> payload) {
-        Double quantidadeVenda = Double.parseDouble(payload.get("quantidadeVenda"));
+    public ResponseEntity<Acao> venderAcao(@PathVariable String ticker, @RequestBody Map<String, Object> payload) {
+        Double quantidadeVenda = parseQuantidade(getAsText(payload, "quantidadeVenda"));
         Acao acao = acaoService.venderAcao(ticker, quantidadeVenda);
         return ResponseEntity.status(HttpStatus.CREATED).body(acao);
     }
@@ -64,9 +69,35 @@ public class AcaoController {
         return ResponseEntity.ok(acao);
     }
 
-    @PutMapping
-    public ResponseEntity<Acao> adicionarAcao(@PathVariable UUID id, Double quantidadeCompra) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Acao> adicionarAcao(@PathVariable UUID id, @RequestBody Map<String, Object> payload) {
+        Double quantidadeCompra = parseQuantidade(getAsText(payload, "quantidadeCompra"));
         Acao acao = acaoService.adicionarAcao(id, quantidadeCompra);
         return ResponseEntity.ok(acao);
+    }
+
+    private String getAsText(Map<String, Object> payload, String field) {
+        Object value = payload.get(field);
+        return value == null ? null : value.toString();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private Double parseQuantidade(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException | NullPointerException ex) {
+            throw new IllegalArgumentException("Quantidade deve ser um numero valido");
+        }
+    }
+
+    private UUID parseCorretoraId(String value) {
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            throw new IllegalArgumentException("Corretora informada e invalida");
+        }
     }
 }
