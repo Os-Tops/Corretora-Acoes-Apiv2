@@ -1,8 +1,10 @@
 package com.projeto.gestao.service;
 
 import com.projeto.gestao.domain.model.Acao;
+import com.projeto.gestao.domain.model.Corretora;
 import com.projeto.gestao.domain.port.CotacaoAcaoPort;
 import com.projeto.gestao.repository.AcaoRepository;
+import com.projeto.gestao.repository.CorretoraRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,12 @@ class AcaoServiceTest {
     @Mock
     private CotacaoAcaoPort cotacaoAcaoPort;
 
+    @Mock
+    private CarteiraService carteiraService;
+
+    @Mock
+    private CorretoraRepository corretoraRepository;
+
     @InjectMocks
     private AcaoService acaoService;
 
@@ -40,8 +48,11 @@ class AcaoServiceTest {
         CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
             "PETR4", "Petrobras PN", "BRL", new BigDecimal("38.50")
         );
+        UUID corretoraId = UUID.randomUUID();
+        Corretora corretora = buildCorretora(corretoraId, "Corretora Teste");
 
         when(acaoRepository.existsByTicker(ticker)).thenReturn(false);
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.of(corretora));
         when(cotacaoAcaoPort.getCotacao(ticker, mercado)).thenReturn(cotacaoMock);
         when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> {
             Acao a = inv.getArgument(0);
@@ -49,14 +60,16 @@ class AcaoServiceTest {
             return a;
         });
 
-        Acao result = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra);
+        Acao result = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra, corretoraId);
 
         assertNotNull(result);
         assertEquals("PETR4", result.getTicker());
         assertEquals("BR", result.getMercado());
         assertEquals("BRL", result.getMoeda());
+        assertEquals(corretora, result.getCorretoraRelacionada());
         assertEquals(new BigDecimal("38.50"), result.getCotacaoAtual());
         assertNotNull(result.getDataHoraCotacao());
+        verify(carteiraService).calcularSaldoAcao();
     }
 
     @Test
@@ -68,30 +81,38 @@ class AcaoServiceTest {
         CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
             "AAPL", "Apple Inc.", "USD", new BigDecimal("213.70")
         );
+        UUID corretoraId = UUID.randomUUID();
+        Corretora corretora = buildCorretora(corretoraId, "Corretora US");
 
         when(acaoRepository.existsByTicker(ticker)).thenReturn(false);
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.of(corretora));
         when(cotacaoAcaoPort.getCotacao(ticker, mercado)).thenReturn(cotacaoMock);
         when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Acao result = acaoService.cadastrarAcao(ticker, mercado,  quantidadeCompra);
+        Acao result = acaoService.cadastrarAcao(ticker, mercado, quantidadeCompra, corretoraId);
 
         assertEquals("USD", result.getMoeda());
         assertEquals("US", result.getMercado());
         assertEquals(new BigDecimal("213.70"), result.getCotacaoAtual());
+        assertEquals(corretora, result.getCorretoraRelacionada());
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando Ticker já cadastrado")
-    void deveLancarExcecaoQuandoTickerDuplicado() {
+    @DisplayName("Deve lançar exceção quando ticker existente nao e localizado")
+    void deveLancarExcecaoQuandoTickerExistenteNaoELocalizado() {
         String ticker = "PETR4";
+        UUID corretoraId = UUID.randomUUID();
+        Corretora corretora = buildCorretora(corretoraId, "Corretora Teste");
         when(acaoRepository.existsByTicker(ticker)).thenReturn(true);
+        when(acaoRepository.findByTicker(ticker)).thenReturn(Optional.empty());
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.of(corretora));
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0)
+            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0, corretoraId)
         );
 
-        assertTrue(ex.getMessage().contains("já existe"));
+        assertTrue(ex.getMessage().contains("cadastrada"));
         verify(cotacaoAcaoPort, never()).getCotacao(anyString(), anyString());
     }
 
@@ -99,16 +120,35 @@ class AcaoServiceTest {
     @DisplayName("Deve lançar exceção quando API de cotação não retorna dados")
     void deveLancarExcecaoQuandoApiCotacaoFalha() {
         String ticker = "XPTO99";
+        UUID corretoraId = UUID.randomUUID();
+        Corretora corretora = buildCorretora(corretoraId, "Corretora Teste");
         when(acaoRepository.existsByTicker(ticker)).thenReturn(false);
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.of(corretora));
         when(cotacaoAcaoPort.getCotacao(ticker, "BR"))
             .thenThrow(new IllegalArgumentException("Ticker 'XPTO99' nao encontrado no mercado BR"));
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0)
+            () -> acaoService.cadastrarAcao(ticker, "BR", 1.0, corretoraId)
         );
 
         assertTrue(ex.getMessage().contains("XPTO99"));
+        verify(acaoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando corretora nao existe")
+    void deveLancarExcecaoQuandoCorretoraNaoExiste() {
+        UUID corretoraId = UUID.randomUUID();
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> acaoService.cadastrarAcao("PETR4", "BR", 1.0, corretoraId)
+        );
+
+        assertTrue(ex.getMessage().contains("Corretora"));
+        verify(cotacaoAcaoPort, never()).getCotacao(anyString(), anyString());
         verify(acaoRepository, never()).save(any());
     }
 
@@ -154,16 +194,29 @@ class AcaoServiceTest {
     @DisplayName("Deve normalizar ticker para maiúsculas ao cadastrar")
     void deveNormalizarTickerParaMaiusculas() {
         String ticker = "petr4";
+        String tickerNormalizado = "PETR4";
+        UUID corretoraId = UUID.randomUUID();
+        Corretora corretora = buildCorretora(corretoraId, "Corretora Teste");
         CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
             "PETR4", "Petrobras PN", "BRL", new BigDecimal("38.50")
         );
 
-        when(acaoRepository.existsByTicker(ticker)).thenReturn(false);
-        when(cotacaoAcaoPort.getCotacao(ticker, "BR")).thenReturn(cotacaoMock);
+        when(acaoRepository.existsByTicker(tickerNormalizado)).thenReturn(false);
+        when(corretoraRepository.findById(corretoraId)).thenReturn(Optional.of(corretora));
+        when(cotacaoAcaoPort.getCotacao(tickerNormalizado, "BR")).thenReturn(cotacaoMock);
         when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Acao result = acaoService.cadastrarAcao(ticker, "BR", 1.0);
+        Acao result = acaoService.cadastrarAcao(ticker, "BR", 1.0, corretoraId);
 
         assertEquals("PETR4", result.getTicker());
+    }
+
+    private Corretora buildCorretora(UUID id, String nomeFantasia) {
+        Corretora corretora = new Corretora();
+        corretora.setId(id);
+        corretora.setCnpj("53931905000141");
+        corretora.setNomeFantasia(nomeFantasia);
+        corretora.setRazaoSocial(nomeFantasia);
+        return corretora;
     }
 }

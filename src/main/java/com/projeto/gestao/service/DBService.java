@@ -1,14 +1,15 @@
 package com.projeto.gestao.service;
 
-import com.projeto.gestao.service.AcaoService;
-import com.projeto.gestao.domain.model.*;
-import com.projeto.gestao.repository.*;
+import com.projeto.gestao.domain.model.Carteira;
+import com.projeto.gestao.domain.model.Corretora;
+import com.projeto.gestao.repository.AcaoRepository;
+import com.projeto.gestao.repository.CarteiraRepository;
+import com.projeto.gestao.repository.CorretoraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -37,7 +38,21 @@ public class DBService {
 
         try {
 
-            acaoService.cadastrarAcao("PETR4", "BR", 2.0);
+            Corretora corretora = corretoraRepo.findByCnpj("00000000000191")
+                    .orElseGet(() -> {
+                        Corretora novaCorretora = new Corretora();
+                        novaCorretora.setCnpj("00000000000191");
+                        novaCorretora.setRazaoSocial("Corretora Demo");
+                        novaCorretora.setNomeFantasia("Corretora Demo");
+                        novaCorretora.setSituacaoCadastral("ATIVA");
+                        novaCorretora.setValidadaNaCvm(true);
+                        novaCorretora.setDataCadastro(LocalDateTime.now());
+                        return corretoraRepo.save(novaCorretora);
+                    });
+
+            if (!acaoRepo.existsByTicker("PETR4")) {
+                acaoService.cadastrarAcao("PETR4", "BR", 2.0, corretora.getId());
+            }
 
             Carteira carteira = new Carteira();
             carteira = carteiraRepository.save(carteira);
