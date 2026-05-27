@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/corretoras")
+@CrossOrigin(origins = "*")
 public class CorretoraController {
 
     private final CorretoraService corretoraService;
