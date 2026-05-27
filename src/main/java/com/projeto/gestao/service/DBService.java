@@ -27,6 +27,8 @@ public class DBService {
 
     @Autowired
     private CorretoraRepository corretoraRepo;
+    @Autowired
+    private CorretoraService corretoraService;
 
     public DBService(CarteiraService carteiraService, AcaoService acaoService) {
         this.carteiraService = carteiraService;
@@ -38,7 +40,7 @@ public class DBService {
 
         try {
 
-            Corretora corretora = corretoraRepo.findByCnpj("00000000000191")
+            /*Corretora corretora = corretoraRepo.findByCnpj("00000000000191")
                     .orElseGet(() -> {
                         Corretora novaCorretora = new Corretora();
                         novaCorretora.setCnpj("00000000000191");
@@ -48,10 +50,14 @@ public class DBService {
                         novaCorretora.setValidadaNaCvm(true);
                         novaCorretora.setDataCadastro(LocalDateTime.now());
                         return corretoraRepo.save(novaCorretora);
-                    });
+                    });*/
+
+            if(corretoraService.listarTodas().isEmpty()){
+                corretoraService.cadastrarCorretora("47847884000188");
+            }
 
             if (!acaoRepo.existsByTicker("PETR4")) {
-                acaoService.cadastrarAcao("PETR4", "BR", 2.0, corretora.getId());
+                acaoService.cadastrarAcao("PETR4", "BR", 2.0, corretoraService.listarTodas().get(0).getId() );
             }
 
             Carteira carteira = new Carteira();
