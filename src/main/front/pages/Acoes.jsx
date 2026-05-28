@@ -49,6 +49,7 @@ const Acoes = () => {
                         <thead>
                         <tr>
                             <th onClick={() => ordenar('ticker')} className="topCollumn">Ticker</th>
+                            <th onClick={() => ordenar('corretora')} className="topCollumn">Corretora</th>
                             <th onClick={() => ordenar('posicao')} className="topCollumn">Posição</th>
                             <th onClick={() => ordenar('nomeEmpresa')} className="topCollumn">Empresa</th>
                             <th onClick={() => ordenar('mercado')} className="topCollumn">Mercado</th>
@@ -62,6 +63,7 @@ const Acoes = () => {
                         {acoes.map((acao, index) => (
                             <tr key={index}>
                                 <td><span className="ticker-badge">{acao.ticker}</span></td>
+                                <td>{acao.corretoraRelacionada.nomeFantasia}</td>
                                 {/* Formatamos para garantir que exiba BRL ou a moeda vinda do banco */}
                                 <td className="price">{`${acao.moeda || 'R$'} ${acao.posicao}`}</td>
                                 <td>{acao.nomeEmpresa}</td>

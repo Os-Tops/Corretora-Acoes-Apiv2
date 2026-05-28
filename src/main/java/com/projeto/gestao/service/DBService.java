@@ -53,7 +53,7 @@ public class DBService {
                     });*/
 
             if(corretoraService.listarTodas().isEmpty()){
-                corretoraService.cadastrarCorretora("47847884000188");
+                corretoraService.cadastrarCorretora("02332886000104");
             }
 
             if (!acaoRepo.existsByTicker("PETR4")) {
