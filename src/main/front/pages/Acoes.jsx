@@ -6,6 +6,7 @@ const Acoes = () => {
     const [carteiras, setCarteiras] = useState([]);
     const [corretoras, setCorretoras] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+    const [modalVendaAberto, setModalVendaAberto] = useState(false);
 
     // Estados default do formulário de cadastro
     const [formData, setFormData] = useState({
@@ -14,7 +15,12 @@ const Acoes = () => {
         quantidadeCompra: '1',
         corretoraId: ''
     });
+    const [vendaData, setVendaData] = useState({
+        acaoIndex: '',
+        quantidade: ''
+    });
     const [statusMensagem, setStatusMensagem] = useState({ tipo: '', texto: '' });
+    const [vendaMensagem, setVendaMensagem] = useState({ tipo: '', texto: '' });
 
     // Busca os dados no Back-end
     useEffect(() => {
@@ -47,6 +53,69 @@ const Acoes = () => {
         setFormData({ ...formData, [name]: value });
     };
 
+    // Funcoes da minitela de venda no Front
+    const handleVendaInputChange = (e) => {
+        const { name, value } = e.target;
+        setVendaData({ ...vendaData, [name]: value });
+    };
+
+    const abrirModalVenda = () => {
+        setVendaMensagem({ tipo: '', texto: '' });
+        setVendaData({ acaoIndex: '', quantidade: '' });
+        setModalVendaAberto(true);
+    };
+
+    const fecharModalVenda = () => {
+        setModalVendaAberto(false);
+        setVendaData({ acaoIndex: '', quantidade: '' });
+    };
+
+    const handleVendaSubmit = (e) => {
+        e.preventDefault();
+        setVendaMensagem({ tipo: '', texto: '' });
+
+        const acaoSelecionada = acoes[Number(vendaData.acaoIndex)];
+        const quantidadeVendida = Number(vendaData.quantidade);
+        const quantidadeDisponivel = acaoSelecionada ? Number(acaoSelecionada.quantidadeTotal) : 0;
+
+        if (vendaData.acaoIndex === '' || !acaoSelecionada || !quantidadeVendida || quantidadeVendida <= 0) {
+            setVendaMensagem({ tipo: 'error', texto: 'Selecione uma acao e informe uma quantidade valida.' });
+            return;
+        }
+
+        if (quantidadeVendida > quantidadeDisponivel) {
+            setVendaMensagem({ tipo: 'error', texto: `Voce possui apenas ${quantidadeDisponivel} unidade(s) desta acao.` });
+            return;
+        }
+
+        fetch(`http://localhost:8080/acoes/${encodeURIComponent(acaoSelecionada.ticker)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ quantidadeVenda: vendaData.quantidade }),
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Erro ao vender a acao");
+                }
+                return response.json();
+            })
+            .then(() => {
+                setVendaMensagem({
+                    tipo: 'success',
+                    texto: `Venda de ${quantidadeVendida} unidade(s) de ${acaoSelecionada.ticker} registrada com sucesso!`
+                });
+                setVendaData({ acaoIndex: '', quantidade: '' });
+                carregarDados();
+            })
+            .catch(error => {
+                console.error("Erro na venda:", error);
+                setVendaMensagem({ tipo: 'error', texto: error.message || 'Erro ao vender acao. Verifique os dados.' });
+            });
+    };
+
     // Função para enviar o cadastro ao Back-end
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -55,6 +124,12 @@ const Acoes = () => {
         // Validação básica no Front
         if (!formData.ticker || !formData.mercado || !formData.quantidadeCompra || !formData.corretoraId) {
             setStatusMensagem({ tipo: 'error', texto: 'Preencha todos os campos obrigatórios.' });
+            return;
+        }
+
+        const quantidadeCompra = Number(formData.quantidadeCompra);
+        if (!quantidadeCompra || quantidadeCompra <= 0) {
+            setStatusMensagem({ tipo: 'error', texto: 'Quantidade de compra deve ser maior que zero.' });
             return;
         }
 
@@ -130,6 +205,7 @@ const Acoes = () => {
                             value={formData.quantidadeCompra}
                             onChange={handleInputChange}
                             placeholder="Ex: 100"
+                            min="0.01"
                             step="0.01"
                             style={styles.input}
                         />
@@ -146,6 +222,13 @@ const Acoes = () => {
                         </select>
                     </div>
                     <button type="submit" style={styles.button}>Adicionar</button>
+                    <button
+                        type="button"
+                        onClick={abrirModalVenda}
+                        style={{ ...styles.button, ...styles.sellButton }}
+                    >
+                        Vender
+                    </button>
                 </form>
                 {statusMensagem.texto && (
                     <p style={{ color: statusMensagem.tipo === 'error' ? 'red' : 'green', marginTop: '10px' }}>
@@ -153,6 +236,73 @@ const Acoes = () => {
                     </p>
                 )}
             </div>
+
+            {modalVendaAberto && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modal}>
+                        <div style={styles.modalHeader}>
+                            <h3 style={styles.modalTitle}>Vender Acao</h3>
+                            <button
+                                type="button"
+                                onClick={fecharModalVenda}
+                                style={styles.closeButton}
+                                aria-label="Fechar venda"
+                            >
+                                x
+                            </button>
+                        </div>
+                        <form onSubmit={handleVendaSubmit} style={styles.vendaForm}>
+                            <div style={styles.inputGroup}>
+                                <label>Acao:</label>
+                                <select
+                                    name="acaoIndex"
+                                    value={vendaData.acaoIndex}
+                                    onChange={handleVendaInputChange}
+                                    style={styles.input}
+                                >
+                                    <option value="">Selecione a acao...</option>
+                                    {acoes.map((acao, index) => (
+                                        <option key={`${acao.ticker}-${index}`} value={index}>
+                                            {acao.ticker} - {acao.nomeEmpresa || 'Empresa nao informada'} ({acao.quantidadeTotal} disponivel)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div style={styles.inputGroup}>
+                                <label>Quantidade:</label>
+                                <input
+                                    type="number"
+                                    name="quantidade"
+                                    value={vendaData.quantidade}
+                                    onChange={handleVendaInputChange}
+                                    min="0.01"
+                                    max={vendaData.acaoIndex !== '' ? acoes[Number(vendaData.acaoIndex)]?.quantidadeTotal : undefined}
+                                    step="0.01"
+                                    placeholder="Ex: 10"
+                                    style={styles.input}
+                                />
+                            </div>
+                            <div style={styles.modalActions}>
+                                <button type="button" onClick={fecharModalVenda} style={styles.secondaryButton}>
+                                    Cancelar
+                                </button>
+                                <button type="submit" style={{ ...styles.button, ...styles.sellButton }}>
+                                    Confirmar venda
+                                </button>
+                            </div>
+                        </form>
+                        {vendaMensagem.texto && (
+                            <p style={{
+                                color: vendaMensagem.tipo === 'error' ? 'red' : 'green',
+                                marginTop: '10px',
+                                fontWeight: 600
+                            }}>
+                                {vendaMensagem.texto}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <div className="table-container">
                 {acoes.length > 0 ? (
@@ -247,6 +397,68 @@ const styles = {
         cursor: 'pointer',
         fontWeight: 'bold',
         height: 'fit-content'
+    },
+    sellButton: {
+        backgroundColor: '#dc3545'
+    },
+    modalOverlay: {
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.72)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        zIndex: 1000
+    },
+    modal: {
+        width: '100%',
+        maxWidth: '420px',
+        backgroundColor: '#f9f9f9',
+        color: '#111827',
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: '0 16px 40px rgba(0,0,0,0.25)'
+    },
+    modalHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginBottom: '16px'
+    },
+    modalTitle: {
+        margin: 0
+    },
+    closeButton: {
+        width: '32px',
+        height: '32px',
+        border: 'none',
+        borderRadius: '50%',
+        backgroundColor: '#e5e7eb',
+        color: '#111827',
+        cursor: 'pointer',
+        fontWeight: 'bold'
+    },
+    vendaForm: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '14px'
+    },
+    modalActions: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: '10px',
+        marginTop: '4px'
+    },
+    secondaryButton: {
+        padding: '9px 16px',
+        backgroundColor: '#e5e7eb',
+        color: '#111827',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontWeight: 'bold'
     }
 };
 

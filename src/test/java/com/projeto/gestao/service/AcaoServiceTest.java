@@ -211,6 +211,64 @@ class AcaoServiceTest {
         assertEquals("PETR4", result.getTicker());
     }
 
+    @Test
+    @DisplayName("Deve vender acao com sucesso")
+    void deveVenderAcaoComSucesso() {
+        Acao acao = new Acao();
+        acao.setTicker("PETR4");
+        acao.setMercado("BR");
+        acao.setQuantidadeTotal(new BigDecimal("10.00"));
+
+        CotacaoAcaoPort.CotacaoInfo cotacaoMock = new CotacaoAcaoPort.CotacaoInfo(
+            "PETR4", "Petrobras PN", "BRL", new BigDecimal("40.00")
+        );
+
+        when(acaoRepository.findByTicker("PETR4")).thenReturn(Optional.of(acao));
+        when(cotacaoAcaoPort.getCotacao("PETR4", "BR")).thenReturn(cotacaoMock);
+        when(acaoRepository.save(any(Acao.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Acao result = acaoService.venderAcao("PETR4", 4.0);
+
+        assertEquals(0, new BigDecimal("6.00").compareTo(result.getQuantidadeTotal()));
+        assertEquals(0, new BigDecimal("240.000").compareTo(result.getPosicao()));
+        assertNotNull(result.getDataHoraCotacao());
+        verify(carteiraService).calcularSaldoAcao();
+        verify(acaoRepository, times(1)).save(acao);
+    }
+
+    @Test
+    @DisplayName("Nao deve vender quantidade maior que a disponivel")
+    void naoDeveVenderQuantidadeMaiorQueDisponivel() {
+        Acao acao = new Acao();
+        acao.setTicker("PETR4");
+        acao.setMercado("BR");
+        acao.setQuantidadeTotal(new BigDecimal("3.00"));
+
+        when(acaoRepository.findByTicker("PETR4")).thenReturn(Optional.of(acao));
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> acaoService.venderAcao("PETR4", 4.0)
+        );
+
+        assertTrue(ex.getMessage().contains("maior"));
+        verify(cotacaoAcaoPort, never()).getCotacao(anyString(), anyString());
+        verify(acaoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Nao deve vender quantidade menor ou igual a zero")
+    void naoDeveVenderQuantidadeMenorOuIgualAZero() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> acaoService.venderAcao("PETR4", 0.0)
+        );
+
+        assertTrue(ex.getMessage().contains("maior que zero"));
+        verify(acaoRepository, never()).findByTicker(anyString());
+        verify(acaoRepository, never()).save(any());
+    }
+
     private Corretora buildCorretora(UUID id, String nomeFantasia) {
         Corretora corretora = new Corretora();
         corretora.setId(id);
