@@ -39,7 +39,7 @@ public class DashboardController {
     public Map<String, Integer> getStats() {
         Map<String, Integer> stats = new HashMap<>();
         stats.put("corretorasCount", corretoraService.listarTodas().size());
-        stats.put("acoesCount", acaoService.listarTodas().size());
+        stats.put("acoesCount", acaoService.listarAtivas().size());
         return stats;
     }
 
@@ -57,7 +57,7 @@ public class DashboardController {
     @GetMapping("/acoes")
     public Map<String, Object> listarAcoesComCarteira() {
         Map<String, Object> response = new HashMap<>();
-        response.put("acoes", acaoService.listarTodas());
+        response.put("acoes", acaoService.listarAtivas());
         response.put("carteiras", carteiraService.listarTodas());
         return response;
     }
