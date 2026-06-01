@@ -195,6 +195,16 @@ public class AcaoService {
         return acaoRepository.findAll();
     }
 
+    public List<Acao> listarAtivas() {
+        return listarTodas().stream()
+                .filter(this::temQuantidadeDisponivel)
+                .toList();
+    }
+
+    private boolean temQuantidadeDisponivel(Acao acao) {
+        return acao.getQuantidadeTotal() != null && acao.getQuantidadeTotal().compareTo(BigDecimal.ZERO) > 0;
+    }
+
     public Optional<Acao> buscarPorId(UUID id) {
         return acaoRepository.findById(id);
     }

@@ -47,7 +47,7 @@ public class AcaoController {
 
     @GetMapping
     public ResponseEntity<List<Acao>> listarAcoes() {
-        return ResponseEntity.ok(acaoService.listarTodas());
+        return ResponseEntity.ok(acaoService.listarAtivas());
     }
 
     @GetMapping("/{id}")

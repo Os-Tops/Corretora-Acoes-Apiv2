@@ -90,12 +90,11 @@ const Corretoras = () => {
         <div className="container">
             <Navbar title="Corretoras" />
 
-            <div className="table-container">
-
-                {/* 3. BARRA DE ADIÇÃO DE CORRETORA */}
-                <div className="add-corretora-bar" style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-                    <form onSubmit={handleAdicionarCorretora} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <label htmlFor="cnpj-input"><strong>Adicionar por CNPJ:</strong></label>
+            <section className="form-panel">
+                <h3>Adicionar Corretora</h3>
+                <form onSubmit={handleAdicionarCorretora} className="app-form search-form">
+                    <div className="field-group">
+                        <label htmlFor="cnpj-input">Adicionar por CNPJ:</label>
                         <input
                             id="cnpj-input"
                             type="text"
@@ -103,39 +102,35 @@ const Corretoras = () => {
                             value={cnpjInput}
                             onChange={(e) => setCnpjInput(e.target.value)}
                             disabled={isLoading}
-                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flex: '1', maxWidth: '300px' }}
+                            className="form-input"
                         />
-                        <button
-                            type="submit"
-                            disabled={isLoading || !cnpjInput}
-                            style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                        >
-                            {isLoading ? 'Buscando...' : 'Adicionar'}
-                        </button>
-                    </form>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isLoading || !cnpjInput}
+                        className="btn btn-primary"
+                    >
+                        {isLoading ? 'Buscando...' : 'Adicionar'}
+                    </button>
+                </form>
 
-                    {/* Exibição de Mensagens de Sucesso ou Erro */}
-                    {mensagem.texto && (
-                        <div style={{
-                            marginTop: '10px',
-                            color: mensagem.tipo === 'error' ? 'red' : 'green',
-                            fontWeight: 'bold'
-                        }}>
-                            {mensagem.texto}
-                        </div>
-                    )}
-                </div>
-                {/* FIM DA BARRA DE ADIÇÃO */}
+                {mensagem.texto && (
+                    <div className={`alert ${mensagem.tipo === 'error' ? 'alert-error' : 'alert-success'}`}>
+                        {mensagem.texto}
+                    </div>
+                )}
+            </section>
+            <div className="table-container">
 
                 {corretoras.length > 0 ? (
                     <table id="minhaTabela">
                         <thead>
                         <tr>
-                            <th onClick={() => ordenar('cnpj')} style={{cursor: 'pointer'}}>CNPJ</th>
-                            <th onClick={() => ordenar('razaoSocial')} style={{cursor: 'pointer'}}>Razão Social</th>
+                            <th onClick={() => ordenar('cnpj')} className="topCollumn">CNPJ</th>
+                            <th onClick={() => ordenar('razaoSocial')} className="topCollumn">Razão Social</th>
                             <th>Telefone</th>
                             <th>Cidade/UF</th>
-                            <th onClick={() => ordenar('validadaNaCvm')} style={{cursor: 'pointer'}}>Validação CVM</th>
+                            <th onClick={() => ordenar('validadaNaCvm')} className="topCollumn">Validação CVM</th>
                         </tr>
                         </thead>
                         <tbody>

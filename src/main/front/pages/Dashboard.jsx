@@ -8,7 +8,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         // Esta função roda assim que a página abre
-        fetch('http://localhost:8080/api/stats')
+        fetch('http://localhost:8080/api/dashboard/stats')
             .then(response => response.json())
             .then(data => setStats(data))
             .catch(error => console.error("Erro ao buscar dados:", error));
@@ -22,13 +22,13 @@ const Dashboard = () => {
                 {/* IMPORTANTE: Use className e não class */}
                 <Link to="/corretoras" className="card">
                     <h2>Corretoras Cadastradas</h2>
-                    <p>Gerencie as corretoras parceiras validadas junto à CVM.</p>
+                    <p>Total de corretoras cadastradas no sistema.</p>
                     <div className="stat">{stats.corretorasCount}</div>
                 </Link>
 
                 <Link to="/acoes" className="card acoes">
-                    <h2>Ações Monitoradas</h2>
-                    <p>Acompanhe os ativos financeiros do mercado BR e US.</p>
+                    <h2>Ações Cadastradas</h2>
+                    <p>Total de acoes com quantidade disponivel em carteira.</p>
                     <div className="stat">{stats.acoesCount}</div>
                 </Link>
             </main>

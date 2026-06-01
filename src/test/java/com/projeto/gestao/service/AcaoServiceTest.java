@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -267,6 +268,25 @@ class AcaoServiceTest {
         assertTrue(ex.getMessage().contains("maior que zero"));
         verify(acaoRepository, never()).findByTicker(anyString());
         verify(acaoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve listar apenas acoes com quantidade disponivel")
+    void deveListarApenasAcoesComQuantidadeDisponivel() {
+        Acao acaoAtiva = new Acao();
+        acaoAtiva.setTicker("PETR4");
+        acaoAtiva.setQuantidadeTotal(new BigDecimal("2.00"));
+
+        Acao acaoZerada = new Acao();
+        acaoZerada.setTicker("VALE3");
+        acaoZerada.setQuantidadeTotal(BigDecimal.ZERO);
+
+        when(acaoRepository.findAll()).thenReturn(List.of(acaoAtiva, acaoZerada));
+
+        List<Acao> result = acaoService.listarAtivas();
+
+        assertEquals(1, result.size());
+        assertEquals("PETR4", result.get(0).getTicker());
     }
 
     private Corretora buildCorretora(UUID id, String nomeFantasia) {

@@ -35,7 +35,7 @@ const Acoes = () => {
                 return response.json();
             })
             .then(data => {
-                setAcoes(data.acoes || []);
+                setAcoes((data.acoes || []).filter(acao => Number(acao.quantidadeTotal) > 0));
                 setCarteiras(data.carteiras || []);
             })
             .catch(error => console.error("Erro na requisição das ações:", error));
@@ -176,10 +176,10 @@ const Acoes = () => {
             <Navbar title="Ações Monitoradas" />
 
             {/* Minitela de Cadastro */}
-            <div className="cadastro-container" style={styles.cadastroContainer}>
+            <section className="form-panel">
                 <h3>Cadastrar Nova Ação</h3>
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    <div style={styles.inputGroup}>
+                <form onSubmit={handleSubmit} className="app-form">
+                    <div className="field-group">
                         <label>Ticker:</label>
                         <input
                             type="text"
@@ -187,17 +187,17 @@ const Acoes = () => {
                             value={formData.ticker}
                             onChange={handleInputChange}
                             placeholder="Ex: PETR4"
-                            style={styles.input}
+                            className="form-input"
                         />
                     </div>
-                    <div style={styles.inputGroup}>
+                    <div className="field-group">
                         <label>Mercado:</label>
-                        <select name="mercado" value={formData.mercado} onChange={handleInputChange} style={styles.input}>
+                        <select name="mercado" value={formData.mercado} onChange={handleInputChange} className="form-input">
                             <option value="BR">Brasil</option>
                             <option value="US">EUA</option>
                         </select>
                     </div>
-                    <div style={styles.inputGroup}>
+                    <div className="field-group">
                         <label>Quantidade:</label>
                         <input
                             type="number"
@@ -207,12 +207,12 @@ const Acoes = () => {
                             placeholder="Ex: 100"
                             min="0.01"
                             step="0.01"
-                            style={styles.input}
+                            className="form-input"
                         />
                     </div>
-                    <div style={styles.inputGroup}>
+                    <div className="field-group">
                         <label>Corretora:</label>
-                        <select name="corretoraId" value={formData.corretoraId} onChange={handleInputChange} style={styles.input}>
+                        <select name="corretoraId" value={formData.corretoraId} onChange={handleInputChange} className="form-input">
                             <option value="">Selecione a corretora...</option>
                             {corretoras.map(corretora => (
                                 <option key={corretora.id} value={corretora.id}>
@@ -221,44 +221,46 @@ const Acoes = () => {
                             ))}
                         </select>
                     </div>
-                    <button type="submit" style={styles.button}>Adicionar</button>
-                    <button
-                        type="button"
-                        onClick={abrirModalVenda}
-                        style={{ ...styles.button, ...styles.sellButton }}
-                    >
-                        Vender
-                    </button>
+                    <div className="form-actions">
+                        <button type="submit" className="btn btn-primary">Adicionar</button>
+                        <button
+                            type="button"
+                            onClick={abrirModalVenda}
+                            className="btn btn-danger"
+                        >
+                            Vender
+                        </button>
+                    </div>
                 </form>
                 {statusMensagem.texto && (
-                    <p style={{ color: statusMensagem.tipo === 'error' ? 'red' : 'green', marginTop: '10px' }}>
+                    <p className={`alert ${statusMensagem.tipo === 'error' ? 'alert-error' : 'alert-success'}`}>
                         {statusMensagem.texto}
                     </p>
                 )}
-            </div>
+            </section>
 
             {modalVendaAberto && (
-                <div style={styles.modalOverlay}>
-                    <div style={styles.modal}>
-                        <div style={styles.modalHeader}>
-                            <h3 style={styles.modalTitle}>Vender Acao</h3>
+                <div className="modal-overlay">
+                    <div className="modal-panel">
+                        <div className="modal-header">
+                            <h3>Vender Acao</h3>
                             <button
                                 type="button"
                                 onClick={fecharModalVenda}
-                                style={styles.closeButton}
+                                className="modal-close"
                                 aria-label="Fechar venda"
                             >
                                 x
                             </button>
                         </div>
-                        <form onSubmit={handleVendaSubmit} style={styles.vendaForm}>
-                            <div style={styles.inputGroup}>
+                        <form onSubmit={handleVendaSubmit} className="modal-form">
+                            <div className="field-group">
                                 <label>Acao:</label>
                                 <select
                                     name="acaoIndex"
                                     value={vendaData.acaoIndex}
                                     onChange={handleVendaInputChange}
-                                    style={styles.input}
+                                    className="form-input"
                                 >
                                     <option value="">Selecione a acao...</option>
                                     {acoes.map((acao, index) => (
@@ -268,7 +270,7 @@ const Acoes = () => {
                                     ))}
                                 </select>
                             </div>
-                            <div style={styles.inputGroup}>
+                            <div className="field-group">
                                 <label>Quantidade:</label>
                                 <input
                                     type="number"
@@ -279,24 +281,20 @@ const Acoes = () => {
                                     max={vendaData.acaoIndex !== '' ? acoes[Number(vendaData.acaoIndex)]?.quantidadeTotal : undefined}
                                     step="0.01"
                                     placeholder="Ex: 10"
-                                    style={styles.input}
+                                    className="form-input"
                                 />
                             </div>
-                            <div style={styles.modalActions}>
-                                <button type="button" onClick={fecharModalVenda} style={styles.secondaryButton}>
+                            <div className="modal-actions">
+                                <button type="button" onClick={fecharModalVenda} className="btn btn-secondary">
                                     Cancelar
                                 </button>
-                                <button type="submit" style={{ ...styles.button, ...styles.sellButton }}>
+                                <button type="submit" className="btn btn-danger">
                                     Confirmar venda
                                 </button>
                             </div>
                         </form>
                         {vendaMensagem.texto && (
-                            <p style={{
-                                color: vendaMensagem.tipo === 'error' ? 'red' : 'green',
-                                marginTop: '10px',
-                                fontWeight: 600
-                            }}>
+                            <p className={`alert ${vendaMensagem.tipo === 'error' ? 'alert-error' : 'alert-success'}`}>
                                 {vendaMensagem.texto}
                             </p>
                         )}
@@ -340,10 +338,10 @@ const Acoes = () => {
                             <tfoot>
                             {carteiras.map((carteira, index) => (
                                 <tr key={index}>
-                                    <td colSpan="7" style={{ textAlign: 'right', fontWeight: 600 }}>
+                                    <td colSpan="7" className="table-total-label">
                                         Saldo Total da Carteira:
                                     </td>
-                                    <td className="price" style={{ fontWeight: 1000 }}>
+                                    <td className="price table-total-value">
                                         {`R$ ${carteira.saldoAcao}`}
                                     </td>
                                 </tr>
@@ -362,104 +360,5 @@ const Acoes = () => {
     );
 };
 
-
-const styles = {
-    cadastroContainer: {
-        backgroundColor: '#f9f9f9',
-        padding: '20px',
-        borderRadius: '8px',
-        marginBottom: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    },
-    form: {
-        display: 'flex',
-        gap: '15px',
-        alignItems: 'flex-end',
-        flexWrap: 'wrap'
-    },
-    inputGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px'
-    },
-    input: {
-        padding: '8px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        minWidth: '150px'
-    },
-    button: {
-        padding: '9px 20px',
-        backgroundColor: '#007bff',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        height: 'fit-content'
-    },
-    sellButton: {
-        backgroundColor: '#dc3545'
-    },
-    modalOverlay: {
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.72)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        zIndex: 1000
-    },
-    modal: {
-        width: '100%',
-        maxWidth: '420px',
-        backgroundColor: '#f9f9f9',
-        color: '#111827',
-        borderRadius: '8px',
-        padding: '20px',
-        boxShadow: '0 16px 40px rgba(0,0,0,0.25)'
-    },
-    modalHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        marginBottom: '16px'
-    },
-    modalTitle: {
-        margin: 0
-    },
-    closeButton: {
-        width: '32px',
-        height: '32px',
-        border: 'none',
-        borderRadius: '50%',
-        backgroundColor: '#e5e7eb',
-        color: '#111827',
-        cursor: 'pointer',
-        fontWeight: 'bold'
-    },
-    vendaForm: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '14px'
-    },
-    modalActions: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        gap: '10px',
-        marginTop: '4px'
-    },
-    secondaryButton: {
-        padding: '9px 16px',
-        backgroundColor: '#e5e7eb',
-        color: '#111827',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontWeight: 'bold'
-    }
-};
 
 export default Acoes;
