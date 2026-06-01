@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/acoes")
+@CrossOrigin(origins = "*")
 public class AcaoController {
 
     private final AcaoService acaoService;
@@ -46,7 +47,7 @@ public class AcaoController {
 
     @GetMapping
     public ResponseEntity<List<Acao>> listarAcoes() {
-        return ResponseEntity.ok(acaoService.listarTodas());
+        return ResponseEntity.ok(acaoService.listarAtivas());
     }
 
     @GetMapping("/{id}")

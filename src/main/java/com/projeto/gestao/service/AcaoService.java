@@ -144,25 +144,35 @@ public class AcaoService {
 
     @Transactional
     public Acao venderAcao(String ticker, Double quantidadeVenda) {
+        if (ticker == null || ticker.isBlank()) {
+            throw new IllegalArgumentException("Ticker e obrigatorio.");
+        }
 
-        UUID id = buscarPorTicker(ticker)
-                .map(Acao::getId)
-                .orElse(null);
+        if (quantidadeVenda == null || quantidadeVenda <= 0) {
+            throw new IllegalArgumentException("Quantidade de venda deve ser maior que zero.");
+        }
 
-        Acao acao = acaoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Ação não encontrada."));
+        Acao acao = buscarPorTicker(ticker)
+                .orElseThrow(() -> new IllegalArgumentException("Acao nao encontrada."));
+
+        BigDecimal quantidadeAtual = acao.getQuantidadeTotal() == null ? BigDecimal.ZERO : acao.getQuantidadeTotal();
+        BigDecimal quantidadeVendaDecimal = BigDecimal.valueOf(quantidadeVenda);
+
+        if (quantidadeVendaDecimal.compareTo(quantidadeAtual) > 0) {
+            throw new IllegalArgumentException("Quantidade de venda nao pode ser maior que a quantidade disponivel.");
+        }
 
         CotacaoAcaoPort.CotacaoInfo cotacaoInfo = cotacaoAcaoPort.getCotacao(acao.getTicker(), acao.getMercado());
         if (cotacaoInfo != null && cotacaoInfo.cotacaoAtual() != null) {
-            acao.setQuantidadeTotal(acao.getQuantidadeTotal().subtract(BigDecimal.valueOf(quantidadeVenda)));
+            acao.setQuantidadeTotal(quantidadeAtual.subtract(quantidadeVendaDecimal));
             acao.setCotacaoAtual(cotacaoInfo.cotacaoAtual());
             acao.calcularPosicaoAtualizada();
             acao.setDataHoraCotacao(LocalDateTime.now());
-            acaoRepository.save(acao);
+            Acao acaoSalva = acaoRepository.save(acao);
 
             carteiraService.calcularSaldoAcao();
 
-            return acaoRepository.save(acao);
+            return acaoSalva;
         }
         throw new IllegalArgumentException("Não foi possível atualizar a cotação no momento.");
     }
@@ -183,6 +193,16 @@ public class AcaoService {
 
     public List<Acao> listarTodas() {
         return acaoRepository.findAll();
+    }
+
+    public List<Acao> listarAtivas() {
+        return listarTodas().stream()
+                .filter(this::temQuantidadeDisponivel)
+                .toList();
+    }
+
+    private boolean temQuantidadeDisponivel(Acao acao) {
+        return acao.getQuantidadeTotal() != null && acao.getQuantidadeTotal().compareTo(BigDecimal.ZERO) > 0;
     }
 
     public Optional<Acao> buscarPorId(UUID id) {
