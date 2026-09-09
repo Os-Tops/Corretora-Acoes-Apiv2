@@ -1,5 +1,6 @@
 package com.projeto.gestao.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,9 +13,22 @@ public class Carteira {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String nome = "Carteira Principal";
+
+    private boolean principal = true;
+
     private BigDecimal saldoAcao =  BigDecimal.ZERO;
 
     private BigDecimal saldoEmConta = BigDecimal.ZERO;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
+    private LocalDateTime criadaEm;
+
+    private LocalDateTime atualizadaEm;
 
     public Carteira() {
     }
@@ -25,12 +39,40 @@ public class Carteira {
         this.saldoEmConta = saldoEmConta;
     }
 
+    @PrePersist
+    void aoCriar() {
+        LocalDateTime agora = LocalDateTime.now();
+        criadaEm = agora;
+        atualizadaEm = agora;
+    }
+
+    @PreUpdate
+    void aoAtualizar() {
+        atualizadaEm = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public boolean isPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(boolean principal) {
+        this.principal = principal;
     }
 
     public BigDecimal getSaldoAcao() {
@@ -47,6 +89,22 @@ public class Carteira {
 
     public void setSaldoEmConta(BigDecimal saldoEmConta) {
         this.saldoEmConta = saldoEmConta;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public LocalDateTime getCriadaEm() {
+        return criadaEm;
+    }
+
+    public LocalDateTime getAtualizadaEm() {
+        return atualizadaEm;
     }
 
     @Override
